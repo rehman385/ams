@@ -1,32 +1,30 @@
 <?php
-// This is the correct code for connecting to your Render PostgreSQL database
+// ---- DATABASE CONNECTION ----
+// Replace with your actual Render credentials
 
-// Step 1: Get the special database URL from the Render environment
-$db_url = getenv("DATABASE_URL");
+$host = 'dpg-d3oj7bu3jp1c73c1nbjg-a.singapore-postgres.render.com';
+$port = '5432';
+$dbname = 'attendance_db_0m4z';
+$user = 'attendance_user';
+$password = 'DaA9WAX7JkCPewNE8DjNA3AxCQ9xXKux'; // Your actual password
 
-// If the URL isn't found, stop everything!
-if ($db_url === false) {
-    die("ERROR: DATABASE_URL environment variable is not set.");
-}
+// Create the connection string (DSN) for PostgreSQL
+$dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
 
-// Step 2: Parse the URL into its individual parts
-$db_parts = parse_url($db_url);
+// Set PDO options
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Throw exceptions on error
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Fetch associative arrays
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
 
-$host = $db_parts['host'];
-$port = $db_parts['port'];
-$dbname = ltrim($db_parts['path'], '/');
-$username = $db_parts['user'];
-$password = $db_parts['pass'];
-
+// Try to connect to the database
 try {
-    // Step 3: Create the connection using the pgsql driver and the correct parts
-    $pdo = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $username, $password);
-    
-    // Set an attribute to show errors, which helps in debugging
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-} catch(PDOException $e) {
-    // If the connection fails, this error will show up in your Render logs
-    die("ERROR: Could not connect to the database. " . $e->getMessage());
+     $pdo = new PDO($dsn, $user, $password, $options);
+     // If you see this message on your site, it means the connection was successful!
+     // echo "Database connection successful!"; 
+} catch (\PDOException $e) {
+     // If connection fails, stop the script and show an error message.
+     // For a live website, you would log this error instead of showing it to the user.
+     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
-?>
